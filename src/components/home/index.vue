@@ -36,15 +36,15 @@
             <el-table-column
               label="操作">
               <template slot-scope="scope">
-                <el-button type="primary" size="small">修改</el-button>
-                <el-button type="danger" size="small">删除</el-button>
+                <el-button type="primary" size="small" @click="updateUser(scope.row)">修改</el-button>
+                <el-button type="danger" size="small" @click="deleteUser(scope.row.user_id)">删除</el-button>
               </template>
             </el-table-column>
           </el-table>
         </template>
       </TabBox>
       <!-- 新增用户对话框 -->
-      <el-dialog @close="resetForm" title="新增用户" width="30%" :visible.sync="newUserVisible">
+      <el-dialog @close="resetForm" :title="dialogTitle" width="30%" :visible.sync="newUserVisible">
         <el-form :model="newUserForm" :rules="newUserFormRules" ref="newUserForm" size="small">
           <el-form-item label="姓名" prop="user_name" label-width="80px">
             <el-input v-model="newUserForm.user_name" auto-complete="off"></el-input>
@@ -59,13 +59,13 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button size="small" @click="newUserVisible = false">取 消</el-button>
-          <el-button size="small" type="primary" @click="createUserSure">确 定</el-button>
+          <el-button size="small" type="primary" @click="handleUserSure">确 定</el-button>
         </div>
       </el-dialog>
   </div>
 </template>
 <script>
-import { getUserlist ,createUser } from '@/http/user'
+import { getUserlist ,createUser,deleteUser ,updateUser} from '@/http/user'
 import TabBox from '@/components/tab-box'
 export default {
   components:{TabBox},
@@ -80,6 +80,7 @@ export default {
     return {
       userList:[],
       //create user
+      dialogTitle:'新增用户',
       newUserVisible:false,
       newUserForm:{
         user_name:'',
@@ -91,37 +92,75 @@ export default {
       newUserFormRules:{
         user_name:[
           { required:true,message:'请输入用户名',trigger:'blur' },
-          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
+          { min: 1, max: 10, message: '长度在 1 到 10 个字符', trigger: 'blur' }
         ],
         phone:[
           { validator:checkPhone,trigger:'blur' },
         ],
-      }
+      },
     }
   },
   methods:{
-    createUserSure(){
+    handleUserSure(){
       this.$refs.newUserForm.validate(valid => {
         if(valid){
-          this.newUserForm.register_date = new Date().toLocaleDateString();
-          createUser(this.newUserForm).then(res=>{
-            this.getUserlist();
-          })
+          if(this.dialogTitle === '新增用户'){
+            this.newUserForm.register_date = new Date().toLocaleDateString();
+            createUser(this.newUserForm).then(res=>{
+              this.getUserlist();
+              this.newUserVisible = false;
+            })
+          }else{
+            updateUser(this.newUserForm).then(res=>{
+              this.getUserlist();
+              this.newUserVisible = false;
+            })
+          }
         }else{
         }
       })
     },
+    updateUser(row){
+      this.dialogTitle = '修改用户';
+      this.newUserVisible = true;
+      this.newUserForm = {
+        user_name:row.user_name,
+        address:row.address,
+        phone:row.phone,
+        salary:row.salary,
+        register_date:row.register_date,
+        user_id:row.user_id
+      };
+    },
+    deleteUser(id){
+      //this.$confirm
+      this.$confirm('确认删除?', '删除用户', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          deleteUser(id).then(res=>{
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            });
+            this.getUserlist();
+          })  
+        })
+    },
     resetForm(){
       this.$refs.newUserForm.resetFields();
+    },
+    getUserlist(){
+      getUserlist().then(res=>{
+        if(res.data.statusCode === 200){
+          this.userList = res.data.data;
+        }
+      })
     }
   },
   mounted() {
-    getUserlist().then(res=>{
-      console.log(res)
-      if(res.data.statusCode === 200){
-        this.userList = res.data.data;
-      }
-    })
+    this.getUserlist();
   }
 }
 </script>

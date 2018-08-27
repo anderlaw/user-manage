@@ -15,3 +15,19 @@ export function createUser(option){
     params:option
   })
 }
+export function deleteUser(id){
+  return service({
+    method: 'get',
+    url: '/user/delete',
+    params:{
+      user_id:id
+    }
+  })
+}
+export function updateUser(option){
+  return service({
+    method: 'get',
+    url: '/user/update',
+    params:option
+  })
+}
