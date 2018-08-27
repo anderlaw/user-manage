@@ -1,4 +1,4 @@
-# 更加方便的vue模板
+# 一个用户管理项目，集成用户管理、文章管理功能
 
 > A Vue.js project，结合vue-cli集成了vue-router,axios,elementUI等
 
