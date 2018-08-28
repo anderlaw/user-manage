@@ -1,12 +1,12 @@
 <template>
-    <div class="love" style="height:100%;">
+    <div style="height:100%;">
         <!-- 头部 -->
         <Head/>
-        <router-view></router-view>
+        <router-view style="height:calc(100% - 90px);box-sizing:border-box;padding:10px;over-flow:auto;"></router-view>
         <!-- 尾部 -->
         <Footer/>
     </div>
-    
+
 </template>
 
 <script>

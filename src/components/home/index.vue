@@ -1,5 +1,5 @@
 <template>
-  <div style="height:calc(100% - 90px);box-sizing:border-box;padding:10px;">
+  <div>
       <TabBox>
         <template slot="title">
           用户管理
@@ -8,7 +8,7 @@
         <template slot="content">
           <el-table
             :data="userList"
-            height="250"
+            min-height="100"
             border
             style="width: 100%">
             <el-table-column
@@ -24,14 +24,46 @@
               prop="phone"
               label="电话">
             </el-table-column>
-            
-            <el-table-column
-              prop="salary"
-              label="薪水">
-            </el-table-column>
             <el-table-column
               prop="register_date"
               label="注册日期">
+            </el-table-column>
+            <el-table-column
+              label="操作">
+              <template slot-scope="scope">
+                <el-button type="primary" size="small" @click="updateUser(scope.row)">修改</el-button>
+                <el-button type="danger" size="small" @click="deleteUser(scope.row.user_id)">删除</el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+        </template>
+      </TabBox>
+      <!-- 文章 -->
+      <TabBox>
+        <template slot="title">
+          文章管理
+          <span @click="writeArticle" class="iconfont icon-wenzhang" style="cursor:pointer;margin-left:10px;color:#f3f3f3;font-size:20px;"></span>
+        </template>
+        <template slot="content">
+          <el-table
+            :data="articleList"
+            min-height="100"
+            border
+            style="width: 100%">
+            <el-table-column
+              label="标题"
+              width="180">
+              <template slot-scope="scope">
+                <span class="link" @click="jumptoInfo(scope.row.article_id)">{{ scope.row.title }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="author"
+              label="作者">
+            </el-table-column>
+            <el-table-column
+              prop="create_date"
+              label="发表日期">
             </el-table-column>
             <el-table-column
               label="操作">
@@ -66,6 +98,7 @@
 </template>
 <script>
 import { getUserlist ,createUser,deleteUser ,updateUser} from '@/http/user'
+import { getArticlelist } from '@/http/article'
 import TabBox from '@/components/tab-box'
 export default {
   components:{TabBox},
@@ -98,6 +131,7 @@ export default {
           { validator:checkPhone,trigger:'blur' },
         ],
       },
+      articleList:[]
     }
   },
   methods:{
@@ -145,7 +179,7 @@ export default {
               message: '删除成功!'
             });
             this.getUserlist();
-          })  
+          })
         })
     },
     resetForm(){
@@ -157,14 +191,42 @@ export default {
           this.userList = res.data.data;
         }
       })
-    }
+    },
+    //文章
+    getArticlelist(){
+      getArticlelist().then(res=>{
+        if(res.data.statusCode === 200){
+          this.articleList = res.data.data;
+        }
+      })
+    },
+    //查看文章
+    jumptoInfo(article_id){
+      this.$router.push({
+        path:'/info',
+        query:{
+          article_id:article_id
+        }
+      })
+    },
+    writeArticle(){
+      this.$router.push({
+        path:'/write'
+      })
+    },
   },
   mounted() {
     this.getUserlist();
+    this.getArticlelist();
   }
 }
 </script>
 
-<style>
-
+<style scoped>
+  .link:hover{
+    text-decoration: underline;
+  }
+  .link{
+    cursor: pointer;
+  }
 </style>
